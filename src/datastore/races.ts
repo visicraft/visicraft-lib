@@ -80,6 +80,7 @@ export const RACE_DOCUMENT_SCHEMA: RxJsonSchema<RaceDocumentType> = {
 
         content_type: {
             type: "string",
+            default: CONTENT_TYPES.races,
             index: true,
             final: true,
 
