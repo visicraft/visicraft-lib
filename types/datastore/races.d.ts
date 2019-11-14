@@ -2,6 +2,7 @@ import { RxCollection, RxDocument, RxJsonSchema } from "rxdb";
 import { VisicraftDatastore } from ".";
 export declare type RaceDocumentType = {
     identifier: string;
+    contributors: string[];
     description: string;
     summary: string;
     title: string;
@@ -13,6 +14,13 @@ export declare type RaceCollection = RxCollection<RaceDocumentType, RaceDocument
 export declare const RACE_COLLECTION_METHODS: RaceCollectionMethods;
 export declare const RACE_DOCUMENT_METHODS: RaceDocumentMethods;
 export declare const RACE_DOCUMENT_SCHEMA: RxJsonSchema<RaceDocumentType>;
+/**
+ * Returns the hash hex identifier for the given Race
+ *
+ * Algorithm:
+ *  sha1( slugify(.title) + map(.contributors, slugify).sort() )
+ */
+export declare function generate_identifier(data: RaceDocumentType): Promise<string>;
 /**
  * Creates the Race collection on the datastore, if not previously existed
  */
