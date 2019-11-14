@@ -6,7 +6,9 @@
     "main": "lib/visicraft-lib.js",
     "typings": "types/visicraft-lib.d.ts",
     "files": [
-        "dist"
+        "dist",
+        "lib",
+        "types"
     ],
     "author": "Visicraft Working Group",
     "repository": {
