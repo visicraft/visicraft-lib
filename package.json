@@ -37,6 +37,8 @@
     "dependencies": {
         "blockly": "^2.20190722.1",
         "memdown": "^1.4.1",
+        "pouchdb-adapter-idb": "^7.1.1",
+        "pouchdb-adapter-memory": "^7.1.1",
         "rxdb": "^8.7.3",
         "rxjs": "^6.5.3"
     }
