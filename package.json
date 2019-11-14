@@ -3,9 +3,8 @@
     "version": "0.0.0",
     "description": "Basis functionality for the Visicraft Web Application and other clients",
     "keywords": [],
-    "main": "dist/visicraft-lib.umd.js",
-    "module": "dist/visicraft-lib.es5.js",
-    "typings": "dist/types/visicraft-lib.d.ts",
+    "main": "lib/visicraft-lib.js",
+    "typings": "types/visicraft-lib.d.ts",
     "files": [
         "dist"
     ],
@@ -20,33 +19,24 @@
     },
     "scripts": {
         "build:docs": "typedoc --out docs --target es6 --theme minimal --mode file src",
-        "build:lib": "tsc --module commonjs && rollup -c rollup.config.js",
-        "prebuild:clean": "rimraf dist",
-        "watch:lib": "rollup -c rollup.config.ts -w",
-        "test:lint": "tslint  --project tsconfig.json -t codeFrame 'src/**/*.ts' 'test/**/*.ts'"
+        "build:lib": "npm run build:lib:typescript && npm run build:lib:browser",
+        "build:lib:browser": "parcel build ./src/visicraft-lib.ts --global visicraft --out-file ./dist/visicraft-lib.umd.js",
+        "build:lib:typescript": "tsc",
+        "prebuild:clean": "rimraf dist"
     },
     "devDependencies": {
-        "cross-env": "^6.0.0",
-        "lodash.camelcase": "^4.3.0",
+        "parcel-bundler": "^1.12.4",
         "prettier": "^1.14.3",
         "rimraf": "^3.0.0",
-        "rollup": "^1.23.1",
-        "rollup-plugin-commonjs": "^10.0.0",
-        "rollup-plugin-json": "^4.0.0",
-        "rollup-plugin-node-resolve": "^5.0.3",
-        "rollup-plugin-sourcemaps": "^0.4.2",
-        "rollup-plugin-typescript2": "^0.23.0",
-        "rxdb": "^8.7.2",
-        "rxjs": "^6.5.3",
         "tslib": "^1.10.0",
-        "tslint": "^5.11.0",
-        "tslint-config-prettier": "^1.15.0",
-        "tslint-config-standard": "^8.0.1",
         "typedoc": "^0.15.0",
         "typescript": "^3.6.4"
     },
     "dependencies": {
         "blockly": "^2.20190722.1",
-        "pouchdb-adapter-memory": "^7.1.1"
+        "ltgt": "^2.2.1",
+        "pouchdb-adapter-memory": "^7.1.1",
+        "rxdb": "^8.7.3",
+        "rxjs": "^6.5.3"
     }
 }
