@@ -3,16 +3,40 @@ import {RxCollection, RxDocument, RxJsonSchema} from "rxdb";
 import slugify from "slugify";
 
 import {VisicraftDatastore} from ".";
+import {CONTENT_TYPES} from "../util/content";
 
+/**
+ * Represents the Race Typescript representation of the datastore Document
+ */
 export type RaceDocumentType = {
+    /**
+     * Represents the persistent identifier of the Race
+     */
     identifier: string;
 
+    /**
+     * Represents the Content Type of the Race (always `CONTENT_TYPES.races`)
+     */
+    content_type: CONTENT_TYPES.races;
+
+    /**
+     * Represents the authors who contributed to the Race
+     */
     contributors: string[];
 
+    /**
+     * Represents the multi-line longform description of the Race (usually Markdown in official clients)
+     */
     description: string;
 
+    /**
+     * Represents the single-line shortform description of the Race
+     */
     summary: string;
 
+    /**
+     * Represents the single-line title of the Race
+     */
     title: string;
 };
 
@@ -32,6 +56,9 @@ export const RACE_COLLECTION_METHODS: RaceCollectionMethods = {};
 
 export const RACE_DOCUMENT_METHODS: RaceDocumentMethods = {};
 
+/**
+ * Represents the JSON Schema for validating Races and creating the datastore Collection
+ */
 export const RACE_DOCUMENT_SCHEMA: RxJsonSchema<RaceDocumentType> = {
     title: "races",
     description: "Schema for validating internally stored WCS Races",
@@ -50,13 +77,25 @@ export const RACE_DOCUMENT_SCHEMA: RxJsonSchema<RaceDocumentType> = {
 
         description: {type: "string"},
         summary: {type: "string"},
-        title: {type: "string"},
+
+        content_type: {
+            type: "string",
+            index: true,
+            final: true,
+
+            enum: [CONTENT_TYPES.races]
+        },
 
         contributors: {
-            final: true,
             type: "array",
+            final: true,
 
             items: {type: "string"}
+        },
+
+        title: {
+            type: "string",
+            index: true
         }
     }
 };
