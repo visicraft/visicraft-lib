@@ -2,9 +2,6 @@ import RxDB from "rxdb";
 
 import {VisicraftDatastore, VisicraftCollections} from "./datastore";
 
-const adapter: any = require("pouchdb-adapter-memory");
-RxDB.plugin(adapter);
-
 /**
  * Represents the interface of options used to configured the initialized datastore
  */
@@ -34,7 +31,7 @@ export interface IVisicraftClientOptions {
  * Represents the normalized options used to configure the initialized datastore
  */
 export class DatastoreOptions implements IDatastoreOptions {
-    adapter = "memory";
+    adapter = "idb";
 
     namespace = "visicraft_v1";
 
