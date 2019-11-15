@@ -3,4 +3,4 @@ export {DatastoreOptions, VisicraftClientOptions} from "./visicraft_client_optio
 
 export {RACE_DOCUMENT_SCHEMA} from "./datastore/races";
 
-export {CONTENT_TYPES} from "./util/content";
+export {CONTENT_TYPES, SORTING_DIRECTIONS, SORTING_MODES} from "./util/constants";

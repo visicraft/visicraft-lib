@@ -1,9 +1,30 @@
 import {sha1} from "crypto-hash";
-import {RxCollection, RxDocument, RxJsonSchema} from "rxdb";
+import {RxCollection, RxDocument, RxJsonSchema, RxQuery} from "rxdb";
 import slugify from "slugify";
 
 import {VisicraftDatastore} from ".";
-import {CONTENT_TYPES} from "../util/content";
+import {CONTENT_TYPES, SORTING_DIRECTIONS, SORTING_MODES} from "../util/constants";
+import {escape_regex} from "../util/string";
+
+/**
+ * Represents the options passable into `RaceCollection.query_races`
+ */
+export interface IQueryRacesOptions {
+    /**
+     * Represents the full-text filter for `.contributors` and `.title` (default: `''`)
+     */
+    filter?: string;
+
+    /**
+     * Represents the sorting direction of the given `.sorting_mode` (default: `SORTING_DIRECTIONS.ascending`)
+     */
+    sorting_direction?: SORTING_DIRECTIONS;
+
+    /**
+     * Represents the sorting mode for ordering the returned results of the query (default: `SORTING_MODE.recent`)
+     */
+    sorting_mode?: SORTING_MODES;
+}
 
 /**
  * Represents the Race Typescript representation of the datastore Document
@@ -40,9 +61,24 @@ export type RaceDocumentType = {
     title: string;
 };
 
-export type RaceDocumentMethods = {};
+/**
+ * Represents the TypeScript interface for the methods associated with Race Documents
+ */
+export type RaceDocumentMethods = {
+    get_short_identifier: () => string;
+    get_title_slug: () => string;
+};
 
-export type RaceCollectionMethods = {};
+/**
+ * Represents the TypeScript interface for methods associated with the Races Collection
+ */
+export type RaceCollectionMethods = {
+    query_race(slug: string): void;
+
+    query_races(
+        options: IQueryRacesOptions
+    ): RxQuery<RaceDocumentType, RxDocument<RaceDocumentType, RaceDocumentMethods>[]>;
+};
 
 export type RaceDocument = RxDocument<RaceDocumentType, RaceDocumentMethods>;
 
@@ -52,9 +88,90 @@ export type RaceCollection = RxCollection<
     RaceCollectionMethods
 >;
 
-export const RACE_COLLECTION_METHODS: RaceCollectionMethods = {};
+export const RACE_COLLECTION_METHODS: RaceCollectionMethods = {
+    /**
+     * Returns a query for a singular Race content, allowing for standardized shortened `.identifier` lookup
+     */
+    query_race(this: RaceCollection, identifier: string): void {},
 
-export const RACE_DOCUMENT_METHODS: RaceDocumentMethods = {};
+    /**
+     * Returns a query for multi-Race content, allowing standardized sorting and filtering
+     */
+    query_races(
+        this: RaceCollection,
+        options: IQueryRacesOptions = {}
+    ): RxQuery<RaceDocumentType, RxDocument<RaceDocumentType, RaceDocumentMethods>[]> {
+        const {filter, sorting_direction, sorting_mode} = Object.assign(
+            {
+                filter: "",
+                sorting_direction: SORTING_DIRECTIONS.ascending,
+                sorting_mode: SORTING_MODES.recent
+            },
+            options
+        );
+
+        // We need to dynamically select the direction symbol string based on direction,
+        // for RxDB, empty is ascending, minus is decending
+        let sorting_symbol;
+        if (sorting_direction === SORTING_DIRECTIONS.ascending) sorting_symbol = "";
+        else if (sorting_direction === SORTING_DIRECTIONS.decending) sorting_symbol = "-";
+        else {
+            throw new Error(
+                `bad dispatch to 'RaceCollection.query_races' (bad sorting direction ${sorting_direction})`
+            );
+        }
+
+        // TODO: support `SORTING_MODES.recent`
+        // If we're sorting by recentness, we need to go by update timestamp.
+        // If by alphabet, go by title
+        let query = this.find();
+        if (sorting_mode === SORTING_MODES.alphabetical) {
+            query = query.sort(sorting_symbol + "title");
+        } else if (sorting_mode === SORTING_MODES.recent) {
+            query = query.sort(sorting_symbol + "identifier");
+        } else {
+            throw new Error(
+                `bad dispatch to 'RaceCollection.query_races' (bad sorting mode ${sorting_mode})`
+            );
+        }
+
+        if (filter) {
+            // Allow end-users to filter via full-text search on the title and contributors, ignoring letter casing
+            const _filter = escape_regex(filter);
+            const regex = new RegExp(`.*${_filter}.*`, "i");
+
+            query = query.or([
+                {
+                    title: {$regex: regex}
+                },
+                {
+                    contributors: {$regex: regex}
+                }
+            ]);
+        }
+
+        return query;
+    }
+};
+
+/**
+ * Represents the methods associated with a `RaceDocument` instance
+ */
+export const RACE_DOCUMENT_METHODS: RaceDocumentMethods = {
+    /**
+     * Returns the shortened variant of the `.identifier` property
+     */
+    get_short_identifier(this: RaceDocument): string {
+        return this.identifier.substr(0, 8);
+    },
+
+    /**
+     * Returns the slug-variant of the Race's title
+     */
+    get_title_slug(this: RaceDocument): string {
+        return slugify(this.title);
+    }
+};
 
 /**
  * Represents the JSON Schema for validating Races and creating the datastore Collection
